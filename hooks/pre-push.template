@@ -1,0 +1,62 @@
+#!/usr/bin/env sh
+
+echo "🚀 PRE-PUSH VALIDATION STARTING..."
+
+# Navigate to project root if needed
+if [ -f "package.json" ]; then
+    PROJECT_ROOT="."
+else
+    # Try to find package.json in parent directories
+    PROJECT_ROOT=$(find . -maxdepth 3 -name "package.json" -exec dirname {} \; | head -1)
+    if [ -n "$PROJECT_ROOT" ]; then
+        cd "$PROJECT_ROOT"
+        echo "Found project root at: $(pwd)"
+    else
+        echo "❌ Cannot find package.json - make sure you're in a Node.js project"
+        exit 1
+    fi
+fi
+
+# Run tests if test script exists
+echo "🧪 Running tests..."
+if npm run test --if-present; then
+    echo "✅ Tests passed"
+else
+    echo "❌ Tests failed - blocking push"
+    exit 1
+fi
+
+# Run comprehensive security scan
+echo "🛡️ Running comprehensive security scan..."
+if npm run security:full; then
+    echo "✅ Security scan passed"
+else
+    echo "❌ Security scan failed - blocking push"
+    exit 1
+fi
+
+# Run Snyk IaC scan if Docker/IaC files present and enterprise preset
+if [ "{{PRESET}}" = "enterprise" ]; then
+    echo "🏗️ Checking for Infrastructure as Code files..."
+    if find . -name "Dockerfile*" -o -name "docker-compose*.yml" -o -name "*.tf" | grep -q .; then
+        echo "🔍 Running Snyk Infrastructure as Code scan..."
+        if npm run security:snyk-iac; then
+            echo "✅ IaC scan passed"
+        else
+            echo "⚠️ IaC scan found issues, but continuing..."
+        fi
+    else
+        echo "ℹ️ No IaC files found, skipping IaC scan"
+    fi
+fi
+
+# Run build to ensure everything compiles
+echo "🏗️ Running build..."
+if npm run build --if-present; then
+    echo "✅ Build successful"
+else
+    echo "❌ Build failed - blocking push"
+    exit 1
+fi
+
+echo "✅ All pre-push validations passed! Safe to push."

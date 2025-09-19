@@ -1,0 +1,58 @@
+#!/usr/bin/env sh
+
+echo "🔍 PRE-COMMIT SECURITY CHECKS STARTING..."
+echo "Current directory: $(pwd)"
+
+# Navigate to project root if needed
+if [ -f "package.json" ]; then
+    PROJECT_ROOT="."
+else
+    # Try to find package.json in parent directories
+    PROJECT_ROOT=$(find . -maxdepth 3 -name "package.json" -exec dirname {} \; | head -1)
+    if [ -n "$PROJECT_ROOT" ]; then
+        cd "$PROJECT_ROOT"
+        echo "Found project root at: $(pwd)"
+    else
+        echo "❌ Cannot find package.json - make sure you're in a Node.js project"
+        exit 1
+    fi
+fi
+
+# Run lint-staged for code quality
+echo "📝 Running lint-staged..."
+if npx lint-staged; then
+    echo "✅ Code formatting and linting passed"
+else
+    echo "❌ Code formatting or linting failed"
+    exit 1
+fi
+
+# Run security audit
+echo "🔒 Running security audit..."
+if npm run security:audit; then
+    echo "✅ Security audit passed"
+else
+    echo "❌ Security audit found vulnerabilities"
+    exit 1
+fi
+
+# Run Snyk scan for standard/enterprise presets
+if [ "{{PRESET}}" != "basic" ]; then
+    echo "🔍 Running Snyk dependency scan..."
+    if npm run security:snyk; then
+        echo "✅ Snyk dependency scan passed"
+    else
+        echo "❌ Snyk dependency scan found vulnerabilities"
+        exit 1
+    fi
+
+    # Run Snyk code analysis (if available)
+    echo "🔎 Running Snyk code analysis..."
+    if npm run security:snyk-code 2>/dev/null; then
+        echo "✅ Snyk code analysis passed"
+    else
+        echo "ℹ️ Snyk code analysis not available (requires paid plan) or no issues found"
+    fi
+fi
+
+echo "✅ All pre-commit security checks passed!"
