@@ -21,6 +21,12 @@ A comprehensive, reusable security pipeline for Node.js projects with automated 
 - **Pre-push**: Comprehensive testing and security validation
 - **Customizable**: Configurable security thresholds and rules
 
+### 🔒 **Security File Protection** ⭐ NEW!
+- **Immutable Protection**: Critical security files can never be accidentally modified or deleted
+- **Cryptographic Verification**: MD5/SHA256 checksums ensure file integrity
+- **Automated Backups**: Timestamped backups with instant restoration
+- **Self-Healing**: Automatic monitoring and recovery capabilities
+
 ### ⚡ **Developer Experience**
 - **Fast execution**: Optimized for developer productivity
 - **Easy installation**: One-command setup
@@ -76,8 +82,14 @@ npm run lint:fix            # Auto-fix linting issues
 npm run format              # Format code with Prettier
 
 # Git hooks (automatic)
-# Pre-commit: formatting + linting + security audit
+# Pre-commit: formatting + linting + security audit + file protection
 # Pre-push: tests + full security scan + build verification
+
+# Security file protection
+npm run security:protect         # Verify file integrity
+npm run security:guard:status    # Check protection status
+npm run security:guard:backup    # Create backup manually
+npm run security:guard:restore   # Restore from backup
 ```
 
 ## 🛠️ Manual Setup
@@ -108,6 +120,7 @@ See [CI_CD_SETUP.md](./docs/CI_CD_SETUP.md) for GitHub Actions, GitLab CI, and o
 
 - [Installation Guide](./docs/INSTALLATION.md)
 - [Configuration Options](./docs/CONFIGURATION.md)
+- [Security File Protection](./docs/SECURITY_FILE_PROTECTION.md) ⭐ NEW!
 - [Troubleshooting](./docs/TROUBLESHOOTING.md)
 - [Contributing](./docs/CONTRIBUTING.md)
 
