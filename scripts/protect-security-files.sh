@@ -3,7 +3,9 @@
 # Security File Protection System
 # This script protects critical security files from accidental modification/deletion
 
-REPO_ROOT="/Users/peterchurch/POC/SOURCE/scheduling-app"
+# Determine the repository root dynamically
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../SOURCE/scheduling-app" && pwd)}"
 SECURITY_GUARD_DIR="$REPO_ROOT/.security-guard"
 BACKUP_DIR="$SECURITY_GUARD_DIR/backups"
 CHECKSUMS_FILE="$SECURITY_GUARD_DIR/security-checksums.txt"
